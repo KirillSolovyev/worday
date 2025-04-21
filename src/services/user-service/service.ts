@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Repository, type FindOptionsWhere } from 'typeorm';
+import { Repository, type FindOptionsWhere, type FindOneOptions } from 'typeorm';
 
 import { User } from '@/entities/user';
 import { CreateUserDTO } from './types';
@@ -26,10 +26,7 @@ export class UserService {
     return this.userRepository.findOneBy(findOptions);
   }
 
-  findWithSettings(findOptions: FindOptionsWhere<User>) {
-    return this.userRepository.findOne({
-      where: findOptions,
-      relations: { settings: true },
-    });
+  findOne(findOptions: FindOneOptions<User>) {
+    return this.userRepository.findOne(findOptions);
   }
 }

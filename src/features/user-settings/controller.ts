@@ -30,7 +30,11 @@ export class UserSettingsController {
     }
 
     // TODO: Implement proper sessions, so we don't need to fetch user in every request
-    const user = await this.userService.findWithSettings({ username });
+    const user = await this.userService.findOne({
+      where: { username },
+      relations: { settings: true },
+    });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -52,7 +56,11 @@ export class UserSettingsController {
       throw new BadRequestException('Username is required');
     }
 
-    const user = await this.userService.findWithSettings({ username });
+    const user = await this.userService.findOne({
+      where: { username },
+      relations: { settings: true },
+    });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
