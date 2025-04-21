@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, MaxLength } from 'class-validator';
 
 import { Language } from '@/shared/config/languages';
 import { LanguageLevel } from '@/shared/config/language-level';
@@ -18,5 +18,6 @@ export class CreateUserSettingsDTO implements Omit<IUserSettings, 'id' | 'user'>
   languageLevel: LanguageLevel;
 
   @IsNotEmpty()
+  @MaxLength(100)
   topics: string;
 }
