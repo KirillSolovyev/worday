@@ -1,0 +1,111 @@
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Type } from '@google/genai';
+
+import { GeminiService } from '@/services/gemini';
+import { UserService } from '@/services/user-service';
+import { WordsService } from '@/services/words-service';
+
+@Injectable()
+export class WordOfDayService {
+  private readonly logger = new Logger(WordOfDayService.name);
+
+  constructor(
+    private userService: UserService,
+    private geminiService: GeminiService,
+    private wordsService: WordsService,
+  ) {}
+
+  async start({ username }: { username: string }) {
+    this.logger.log(`Starting word generation for user: ${username}`);
+
+    const user = await this.userService.findOne({
+      where: { username },
+      relations: { settings: true },
+    });
+    if (user) {
+      return user;
+    }
+
+    this.logger.log(`User not found, creating new user: ${username}`);
+    const newUser = await this.userService.create({ username });
+    return this.userService.save(newUser);
+  }
+
+  async getWord({ username }: { username: string }) {
+    const user = await this.userService.findOne({
+      where: { username },
+      relations: { settings: true, words: true },
+    });
+
+    if (!user?.settings) {
+      this.logger.error(`User settings not found for user: ${username}`);
+      throw new NotFoundException('User settings not found');
+    }
+
+    const { targetLanguage, languageLevel, baseLanguage, topics } = user.settings;
+
+    const prompt = `
+      Generate a single word in ${targetLanguage} for ${languageLevel} level.
+      Word: should be related but not limited to ${topics} themes.
+      definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations in this format: <non-translated word> - <translations>; <definition>.
+      Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level.
+
+      Words should be unique. Do not repeat these words: ${user.words.map(({ word }) => word).join(', ')}
+    `;
+
+    this.logger.log(prompt);
+
+    const response = await this.geminiService.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }],
+        },
+      ],
+      config: {
+        systemInstruction:
+          "You are a language teacher. Generate a word (noun, verb or adjective) with 3 example sentences. You should be serious and friendly, but one example might be funny and sarcastic. Don't use markdown, quotes or any other formatting.",
+        temperature: 1.25,
+        topP: 0.8,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            word: {
+              type: Type.STRING,
+              description: `The word of the day`,
+            },
+            definition: {
+              type: Type.STRING,
+              description: `The definition of the word`,
+            },
+            examples: {
+              type: Type.ARRAY,
+              description: `3 example sentences`,
+              items: {
+                type: Type.STRING,
+              },
+            },
+          },
+          required: ['word', 'definition', 'examples'],
+        },
+      },
+    });
+
+    if (!response) {
+      this.logger.error('No response from Gemini');
+      throw new BadRequestException('We could not generate a word');
+    }
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      await this.wordsService.createWord(user, JSON.parse(response));
+    } catch (error) {
+      this.logger.error('Error while saving word', error);
+      throw new BadRequestException('We could not save the word');
+    }
+
+    return response;
+  }
+}

@@ -5,11 +5,16 @@ import { DBProvider } from '@/providers/db-provider';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 
-import { WordModule } from '@/features/word-module';
+import { WordOfDayModule } from '@/features/word-of-day-module';
 import { UserSettingsModule } from '@/features/user-settings';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), DBProvider, WordModule, UserSettingsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DBProvider,
+    WordOfDayModule,
+    UserSettingsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
