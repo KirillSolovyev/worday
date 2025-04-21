@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, Relation } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, Relation, OneToMany } from 'typeorm';
 
 import { IUser } from './types';
 import { UserSettings } from '../user-settings';
+import { Word } from '../word';
 
 @Entity()
 export class User implements IUser {
@@ -16,4 +17,7 @@ export class User implements IUser {
 
   @OneToOne(() => UserSettings, settings => settings.user, { cascade: true })
   settings: Relation<UserSettings>;
+
+  @OneToMany(() => Word, word => word.user)
+  words: Relation<Word[]>;
 }
