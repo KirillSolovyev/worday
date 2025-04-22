@@ -3,6 +3,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToOne, Relation, OneToMany }
 import { IUser } from './types';
 import { UserSettings } from '../user-settings';
 import { Word } from '../word';
+import { UserState } from '../user-state';
 
 @Entity()
 export class User implements IUser {
@@ -20,4 +21,7 @@ export class User implements IUser {
 
   @OneToMany(() => Word, word => word.user)
   words: Relation<Word[]>;
+
+  @OneToOne(() => UserState, userState => userState.user)
+  state: Relation<UserState>;
 }
