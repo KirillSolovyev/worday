@@ -3,11 +3,15 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository, type FindOptionsWhere, type FindOneOptions } from 'typeorm';
 
 import { User } from '@/entities/user';
+import { UserState } from '@/entities/user-state';
 import { CreateUserDTO } from './types';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(UserState) private userStateRepository: Repository<UserState>,
+  ) {}
 
   async create({ username, isActive }: CreateUserDTO) {
     const existingUser = await this.userRepository.findOneBy({ username });
@@ -15,10 +19,8 @@ export class UserService {
       throw new BadRequestException('User already exists');
     }
 
-    return this.userRepository.create({ username, isActive });
-  }
-
-  save(user: User) {
+    const user = this.userRepository.create({ username, isActive });
+    this.userStateRepository.create({ user });
     return this.userRepository.save(user);
   }
 
