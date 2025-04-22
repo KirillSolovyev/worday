@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Type } from '@google/genai';
 
+import { User } from '@/entities/user';
 import { GeminiService } from '@/services/gemini';
-import { UserService } from '@/services/user-service';
 import { WordsService } from '@/services/words-service';
 
 @Injectable()
@@ -10,35 +10,13 @@ export class WordOfDayService {
   private readonly logger = new Logger(WordOfDayService.name);
 
   constructor(
-    private userService: UserService,
     private geminiService: GeminiService,
     private wordsService: WordsService,
   ) {}
 
-  async start({ username }: { username: string }) {
-    this.logger.log(`Starting word generation for user: ${username}`);
-
-    const user = await this.userService.findOne({
-      where: { username },
-      relations: { settings: true },
-    });
-    if (user) {
-      return user;
-    }
-
-    this.logger.log(`User not found, creating new user: ${username}`);
-    const newUser = await this.userService.create({ username });
-    return this.userService.save(newUser);
-  }
-
-  async getWord({ username }: { username: string }) {
-    const user = await this.userService.findOne({
-      where: { username },
-      relations: { settings: true, words: true },
-    });
-
-    if (!user?.settings) {
-      this.logger.error(`User settings not found for user: ${username}`);
+  async getWord(user: User) {
+    if (!user.settings) {
+      this.logger.error(`User settings not found for user: ${user.username}`);
       throw new NotFoundException('User settings not found');
     }
 
