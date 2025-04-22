@@ -38,7 +38,7 @@ export class UserSettingsService {
       throw new NotFoundException('User settings not found');
     }
 
-    const updatedUserSettings = this.userSettingsRepository.save({
+    const updatedUserSettings = await this.userSettingsRepository.save({
       ...existingSettings,
       ...userSettings,
     });
