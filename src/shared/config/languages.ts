@@ -12,4 +12,8 @@ export enum Language {
   KK = 'kk', // Kazakh
   RU = 'ru', // Russian
   KO = 'ko', // Korean
+  UZ = 'uz', // Uzbek
+  KG = 'kg', // Kyrgyz
+  TR = 'tr', // Turkish
+  IT = 'it', // Italian
 }
