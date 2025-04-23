@@ -7,7 +7,6 @@ import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 
 import { TelegramBotModule } from '@/modules/telegram-bot';
-import { UserSettingsModule } from '@/features/user-settings';
 
 @Module({
   imports: [
@@ -28,7 +27,6 @@ import { UserSettingsModule } from '@/features/user-settings';
         };
       },
     }),
-    UserSettingsModule,
     TelegramBotModule,
   ],
   controllers: [AppController],

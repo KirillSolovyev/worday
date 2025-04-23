@@ -15,10 +15,10 @@ export class UserSettingsService {
     private userSettingsRepository: Repository<UserSettings>,
   ) {}
 
-  async create(user: User, settings: CreateUserSettingsDTO) {
+  async create(user: User) {
     this.logger.log(`Setting user settings for user: ${user.id}`);
 
-    const userSettings = this.userSettingsRepository.create({ ...settings, user });
+    const userSettings = this.userSettingsRepository.create({ user });
     const savedUserSettings = await this.userSettingsRepository.save(userSettings);
     this.logger.log(`User settings saved successfully`);
 
