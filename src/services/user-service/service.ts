@@ -5,12 +5,14 @@ import { Repository, type FindOptionsWhere, type FindOneOptions } from 'typeorm'
 import { User } from '@/entities/user';
 import { UserState } from '@/entities/user-state';
 import { CreateUserDTO } from './types';
+import { UserSettingsService } from '@/entities/user-settings';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserState) private userStateRepository: Repository<UserState>,
+    private userSettingsService: UserSettingsService,
   ) {}
 
   async create({ username, isActive }: CreateUserDTO) {
@@ -20,8 +22,14 @@ export class UserService {
     }
 
     const user = this.userRepository.create({ username, isActive });
-    this.userStateRepository.create({ user });
-    return this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+
+    const userState = this.userStateRepository.create({ user: savedUser });
+    await this.userStateRepository.save(userState);
+
+    await this.userSettingsService.create(user);
+
+    return savedUser;
   }
 
   findOneBy(findOptions: FindOptionsWhere<User>) {

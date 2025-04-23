@@ -22,6 +22,6 @@ export class User implements IUser {
   @OneToMany(() => Word, word => word.user)
   words: Relation<Word[]>;
 
-  @OneToOne(() => UserState, userState => userState.user)
+  @OneToOne(() => UserState, userState => userState.user, { cascade: true })
   state: Relation<UserState>;
 }

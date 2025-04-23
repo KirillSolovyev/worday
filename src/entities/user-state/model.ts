@@ -7,7 +7,7 @@ export class UserState {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, user => user.state, { cascade: true })
+  @OneToOne(() => User, user => user.state)
   @JoinColumn()
   user: Relation<User>;
 
