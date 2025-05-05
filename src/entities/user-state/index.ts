@@ -1,2 +1,2 @@
 export { UserState } from './model';
-export { UserStateEnum } from './types';
+export { UserStateEnum, type IUserState } from './types';

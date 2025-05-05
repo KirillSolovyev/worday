@@ -1,3 +1,10 @@
+import type { IUser } from '../user';
+export interface IUserState {
+  id: string;
+  user: IUser;
+  currentState: UserStateEnum;
+}
+
 export enum UserStateEnum {
   /**
    * @description When a user is logged in, but has not yet completed the settings setup
