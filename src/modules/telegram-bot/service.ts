@@ -1,11 +1,12 @@
-import { Ctx, Start, Update, Command, On, Message } from 'nestjs-telegraf';
+import { Ctx, Start, Command, Update, On } from 'nestjs-telegraf';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Context } from 'telegraf';
 
-import { GeminiService } from '@/services/gemini';
+import { UserStateEnum } from '@/entities/user-state';
 import { UserService } from '@/services/user-service';
-import { WordsService } from '@/services/words-service';
-import { LanguageService } from '@/features/language-module';
+
+import { TelegramBotStateService } from './model';
+import { prettyTL } from '@/shared/lib/pretty-tl';
 
 @Injectable()
 @Update()
@@ -14,41 +15,74 @@ export class TelegramBotUpdateService {
 
   constructor(
     private userService: UserService,
-    private geminiService: GeminiService,
-    private wordsService: WordsService,
-    private languageService: LanguageService,
+    private telegramBotStateService: TelegramBotStateService,
   ) {}
 
-  private async getUsernameFromContext(ctx: Context): Promise<string | null> {
+  private async getUsernameFromContext(ctx: Context) {
     const username = ctx.from?.username;
 
     if (!username) {
       this.logger.error('No username found in context');
       await ctx.reply('It looks like you have not started the bot yet. Try to type /start');
-      return null;
+      return;
     }
 
     return username;
   }
 
-  @Start()
-  async onStart(@Ctx() ctx: Context) {
+  private async getUserFromContext(ctx: Context) {
     const username = await this.getUsernameFromContext(ctx);
     if (!username) return;
 
-    this.logger.log('Starting Telegram bot', username);
-
-    let user = await this.userService.findOne({
+    const user = await this.userService.findOne({
       where: { username },
       relations: { settings: true, state: true },
     });
 
     if (!user) {
-      this.logger.log(`User not found, creating new user: ${username}`);
-      user = await this.userService.create({ username });
+      await ctx.reply('User not found. Please start the bot first: `/start`');
+      return;
     }
 
-    await ctx.reply('Welcome to the word of the day bot!');
+    return user;
+  }
+
+  @Start()
+  async onStart(@Ctx() ctx: Context) {
+    const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.INIT);
+
+    try {
+      await botState.start();
+      await botState.handle();
+
+      const nextBotState = this.telegramBotStateService.getNextState(ctx, UserStateEnum.INIT);
+      await nextBotState.start();
+    } catch (error) {
+      this.logger.error('Error while starting bot', error);
+
+      if (error instanceof NotFoundException) {
+        await ctx.reply('It looks like you have not started the bot yet. Try to type `/start`', {
+          parse_mode: 'Markdown',
+        });
+      } else {
+        await ctx.reply('Oops, I could not handle your request. Please try again');
+      }
+    }
+  }
+
+  @Command('word')
+  async onGetWord(@Ctx() ctx: Context) {
+    const user = await this.getUserFromContext(ctx);
+    if (!user) return;
+
+    const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.WORD);
+
+    try {
+      await botState.handle();
+    } catch (error) {
+      this.logger.error('Error while generating the word', error);
+      await ctx.reply('Oops, I could not generate a word. Please try again');
+    }
   }
 
   @Command('settings')
@@ -62,41 +96,85 @@ export class TelegramBotUpdateService {
     });
 
     if (!settings) {
-      await ctx.reply('Settings not found. Please set it up first: `/settings/create`', {
-        parse_mode: 'Markdown',
-      });
+      await ctx.reply(
+        'Oops, I could not find your settings. Please try to start the bot again /start',
+      );
       return;
     }
 
     const { targetLanguage, languageLevel, baseLanguage, topics } = settings.settings;
-    const message = `
-      **Your settings:**
-      - Study language: ${targetLanguage}
-      - Base language: ${baseLanguage}
-      - Language level: ${languageLevel}
-      - Topics: ${topics}
-    `;
+    const message = prettyTL(`
+      *Study language:*
+      \`${targetLanguage}\`
+      Text /language to change it
+
+      *Base language:*
+      \`${baseLanguage}\`
+      Text /studylanguage to change it 
+
+      *Language level:*
+      \`${languageLevel}\`
+      Text /level to change it
+
+      *Topics:*
+      \`${topics}\`
+      Text to change it /topics
+
+      You can change your settings at any time. Just text me the command
+    `);
 
     await ctx.reply(message, { parse_mode: 'Markdown' });
   }
 
-  // TODO: Implement a state machine for settings
   @On('text')
-  async onText(@Ctx() ctx: Context, @Message('text') message: string) {
-    const username = await this.getUsernameFromContext(ctx);
-    if (!username) return;
+  async onText(@Ctx() ctx: Context) {
+    const user = await this.getUserFromContext(ctx);
+    if (!user) return;
 
+    if (user.state.currentState === UserStateEnum.WORD) {
+      await ctx.reply('To generate a new word, please type /word');
+      return;
+    }
+
+    const botState = this.telegramBotStateService.getState(ctx, user.state.currentState);
     try {
-      const language = await this.languageService.getLanguageFromPrompt({ userPrompt: message });
-      await ctx.reply(`The language set to: ${language}`);
-    } catch (error) {
-      this.logger.error('Error while getting language', error);
-      if (error instanceof NotFoundException) {
-        await ctx.reply('Language not found. Please try again.');
-        return;
-      }
+      await botState.handle();
 
-      await ctx.reply("I couldn't get you. Please try again.");
+      const nextBotState = this.telegramBotStateService.getNextState(ctx, user.state.currentState);
+      await nextBotState.start();
+    } catch (error) {
+      if (error instanceof Error) {
+        await ctx.reply(error.message);
+      } else {
+        await ctx.reply('Oops, I could not process your request. Please try again.');
+      }
+    }
+  }
+
+  @On('callback_query')
+  async onCallbackQuery(@Ctx() ctx: Context) {
+    const user = await this.getUserFromContext(ctx);
+    if (!user) return;
+
+    if (user.state.currentState !== UserStateEnum.INIT_LANGUAGE_LEVEL) {
+      await ctx.reply(
+        `The language level is already set to ${user.settings.languageLevel}. If you want to change it, text /level`,
+      );
+      return;
+    }
+
+    const botState = this.telegramBotStateService.getState(ctx, user.state.currentState);
+    try {
+      await botState.handle();
+
+      const nextBotState = this.telegramBotStateService.getNextState(ctx, user.state.currentState);
+      await nextBotState.start();
+    } catch (error) {
+      if (error instanceof Error) {
+        await ctx.reply(error.message);
+      } else {
+        await ctx.reply('Oops, I could not process your request. Please try again.');
+      }
     }
   }
 }
