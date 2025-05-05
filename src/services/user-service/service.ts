@@ -4,8 +4,8 @@ import { Repository, type FindOptionsWhere, type FindOneOptions } from 'typeorm'
 
 import { User } from '@/entities/user';
 import { UserState } from '@/entities/user-state';
-import { CreateUserDTO } from './types';
-import { UserSettingsService } from '@/entities/user-settings';
+import { UserSettingsService } from '../user-settings-service';
+import { CreateUserDTO, UpdateStateDTO } from './types';
 
 @Injectable()
 export class UserService {
@@ -22,10 +22,8 @@ export class UserService {
     }
 
     const user = this.userRepository.create({ username, isActive });
+    user.state = this.userStateRepository.create();
     const savedUser = await this.userRepository.save(user);
-
-    const userState = this.userStateRepository.create({ user: savedUser });
-    await this.userStateRepository.save(userState);
 
     await this.userSettingsService.create(user);
 
@@ -38,5 +36,21 @@ export class UserService {
 
   findOne(findOptions: FindOneOptions<User>) {
     return this.userRepository.findOne(findOptions);
+  }
+
+  async updateState({ user, currentState }: UpdateStateDTO) {
+    if (!user.state) {
+      throw new BadRequestException('User does not have a state');
+    }
+
+    const existingUserState = await this.userStateRepository.findOneBy({ id: user.state.id });
+    if (!existingUserState) {
+      throw new BadRequestException('User state not found');
+    }
+
+    return this.userStateRepository.save({
+      ...existingUserState,
+      currentState: currentState,
+    });
   }
 }

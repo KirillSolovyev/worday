@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from '@/entities/user';
 import { UserState } from '@/entities/user-state';
-import { UserSettings, UserSettingsService } from '@/entities/user-settings';
+import { UserSettingsModule } from '../user-settings-service';
 import { UserService } from './service';
 
 export { UserService } from './service';
@@ -12,9 +12,9 @@ export { UserService } from './service';
   imports: [
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([UserState]),
-    TypeOrmModule.forFeature([UserSettings]),
+    UserSettingsModule,
   ],
-  providers: [UserService, UserSettingsService],
+  providers: [UserService],
   exports: [UserService],
 })
 export class UserModule {}
