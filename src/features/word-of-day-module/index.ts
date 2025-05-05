@@ -5,8 +5,11 @@ import { WordsModule } from '@/services/words-service';
 
 import { WordOfDayService } from './service';
 
+export { WordOfDayService } from './service';
+
 @Module({
   imports: [GeminiModule, WordsModule],
   providers: [WordOfDayService],
+  exports: [WordOfDayService],
 })
 export class WordOfDayModule {}

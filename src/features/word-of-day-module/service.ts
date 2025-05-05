@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Type } from '@google/genai';
 
 import { User } from '@/entities/user';
@@ -17,7 +17,12 @@ export class WordOfDayService {
   async getWord(user: User) {
     if (!user.settings) {
       this.logger.error(`User settings not found for user: ${user.username}`);
-      throw new NotFoundException('User settings not found');
+      throw new Error('User settings not found');
+    }
+
+    if (!user.words) {
+      this.logger.error('User words not provided');
+      throw new Error('User words not provided');
     }
 
     const { targetLanguage, languageLevel, baseLanguage, topics } = user.settings;
@@ -28,7 +33,7 @@ export class WordOfDayService {
       definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations in this format: <non-translated word> - <translations>; <definition>.
       Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level.
 
-      Words should be unique. Do not repeat these words: ${user.words.map(({ word }) => word).join(', ')}
+      Words should be unique. Do not repeat these words: ${user.words?.map(({ word }) => word).join(', ')}
     `;
 
     this.logger.log(prompt);
@@ -73,17 +78,15 @@ export class WordOfDayService {
 
     if (!response) {
       this.logger.error('No response from Gemini');
-      throw new BadRequestException('We could not generate a word');
+      throw new Error('We could not generate a word');
     }
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      await this.wordsService.createWord(user, JSON.parse(response));
+      return await this.wordsService.createWord(user, JSON.parse(response));
     } catch (error) {
       this.logger.error('Error while saving word', error);
-      throw new BadRequestException('We could not save the word');
+      throw new Error('We could not save the word');
     }
-
-    return response;
   }
 }
