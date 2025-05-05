@@ -12,3 +12,5 @@ export class ParsedLanguage {
   @IsEnum(Language)
   language: Language;
 }
+
+export class LanguageNotFoundError extends Error {}

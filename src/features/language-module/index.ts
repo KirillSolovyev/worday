@@ -3,6 +3,7 @@ import { GeminiModule } from '@/services/gemini';
 import { LanguageService } from './service';
 
 export { LanguageService } from './service';
+export { LanguageNotFoundError } from './types';
 
 @Module({
   imports: [GeminiModule],
