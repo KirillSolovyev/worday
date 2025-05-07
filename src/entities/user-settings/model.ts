@@ -10,7 +10,7 @@ export class UserSettings implements IUserSettings {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, user => user.settings)
+  @OneToOne(() => User, user => user.settings, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Relation<User>;
 

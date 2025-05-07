@@ -10,7 +10,7 @@ export class WordExamples implements IWordExamples {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Word, word => word.examples)
+  @ManyToOne(() => Word, word => word.examples, { onDelete: 'CASCADE' })
   word: Relation<Word>;
 
   @Column({ nullable: false })

@@ -7,7 +7,7 @@ export class UserState {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, user => user.state)
+  @OneToOne(() => User, user => user.state, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: Relation<User>;
 

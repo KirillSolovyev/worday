@@ -19,7 +19,7 @@ export class Word implements IWord {
   @Column({ nullable: false })
   definition: string;
 
-  @ManyToOne(() => User, user => user.words)
+  @ManyToOne(() => User, user => user.words, { onDelete: 'CASCADE' })
   user: Relation<User>;
 
   @OneToMany(() => WordExamples, example => example.word, { cascade: true })
