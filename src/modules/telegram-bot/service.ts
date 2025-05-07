@@ -5,8 +5,9 @@ import type { Context } from 'telegraf';
 import { UserStateEnum } from '@/entities/user-state';
 import { UserService } from '@/services/user-service';
 
-import { TelegramBotStateService } from './model';
 import { prettyTL } from '@/shared/lib/pretty-tl';
+import { TelegramBotStateService } from './model';
+import { TelegramBotCommand } from './types';
 
 @Injectable()
 @Update()
@@ -23,7 +24,9 @@ export class TelegramBotUpdateService {
 
     if (!username) {
       this.logger.error('No username found in context');
-      await ctx.reply('It looks like you have not started the bot yet. Try to type /start');
+      await ctx.reply(
+        `It looks like you have not started the bot yet. Try to type /${TelegramBotCommand.START}`,
+      );
       return;
     }
 
@@ -40,7 +43,7 @@ export class TelegramBotUpdateService {
     });
 
     if (!user) {
-      await ctx.reply('User not found. Please start the bot first: `/start`');
+      await ctx.reply(`User not found. Please start the bot first: /${TelegramBotCommand.START}`);
       return;
     }
 
@@ -61,16 +64,19 @@ export class TelegramBotUpdateService {
       this.logger.error('Error while starting bot', error);
 
       if (error instanceof NotFoundException) {
-        await ctx.reply('It looks like you have not started the bot yet. Try to type `/start`', {
-          parse_mode: 'Markdown',
-        });
+        await ctx.reply(
+          `It looks like you have not started the bot yet. Try to type /${TelegramBotCommand.START}`,
+          {
+            parse_mode: 'Markdown',
+          },
+        );
       } else {
         await ctx.reply('Oops, I could not handle your request. Please try again');
       }
     }
   }
 
-  @Command('word')
+  @Command(TelegramBotCommand.WORD)
   async onGetWord(@Ctx() ctx: Context) {
     const user = await this.getUserFromContext(ctx);
     if (!user) return;
@@ -85,7 +91,7 @@ export class TelegramBotUpdateService {
     }
   }
 
-  @Command('settings')
+  @Command(TelegramBotCommand.SETTINGS)
   async onGetSettings(@Ctx() ctx: Context) {
     const username = await this.getUsernameFromContext(ctx);
     if (!username) return;
@@ -97,7 +103,7 @@ export class TelegramBotUpdateService {
 
     if (!settings) {
       await ctx.reply(
-        'Oops, I could not find your settings. Please try to start the bot again /start',
+        `Oops, I could not find your settings. Please try to start the bot again /${TelegramBotCommand.START}`,
       );
       return;
     }
@@ -106,19 +112,19 @@ export class TelegramBotUpdateService {
     const message = prettyTL(`
       *Study language:*
       \`${targetLanguage}\`
-      Text /language to change it
+      Text /${TelegramBotCommand.TARGET_LANGUAGE} to change it
 
       *Base language:*
       \`${baseLanguage}\`
-      Text /studylanguage to change it 
+      Text /${TelegramBotCommand.BASE_LANGUAGE} to change it 
 
       *Language level:*
       \`${languageLevel}\`
-      Text /level to change it
+      Text /${TelegramBotCommand.LANGUAGE_LEVEL} to change it
 
       *Topics:*
       \`${topics}\`
-      Text to change it /topics
+      Text to change it /${TelegramBotCommand.TOPICS}
 
       You can change your settings at any time. Just text me the command
     `);
@@ -132,7 +138,7 @@ export class TelegramBotUpdateService {
     if (!user) return;
 
     if (user.state.currentState === UserStateEnum.WORD) {
-      await ctx.reply('To generate a new word, please type /word');
+      await ctx.reply(`To generate a new word, please type /${TelegramBotCommand.WORD}`);
       return;
     }
 
@@ -156,9 +162,13 @@ export class TelegramBotUpdateService {
     const user = await this.getUserFromContext(ctx);
     if (!user) return;
 
-    if (user.state.currentState !== UserStateEnum.INIT_LANGUAGE_LEVEL) {
+    if (
+      ![UserStateEnum.INIT_LANGUAGE_LEVEL, UserStateEnum.SETTINGS_LANGUAGE_LEVEL].includes(
+        user.state.currentState,
+      )
+    ) {
       await ctx.reply(
-        `The language level is already set to ${user.settings.languageLevel}. If you want to change it, text /level`,
+        `The language level is already set to ${user.settings.languageLevel}. If you want to change it, text /${TelegramBotCommand.LANGUAGE_LEVEL}`,
       );
       return;
     }

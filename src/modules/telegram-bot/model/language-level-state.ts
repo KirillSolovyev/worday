@@ -6,6 +6,7 @@ import { UserSettingsService } from '@/services/user-settings-service';
 import { LanguageLevel } from '@/shared/config/language-level';
 
 import { AbstractState } from './abstract-state';
+import { TelegramBotCommand } from '../types';
 
 export class LanguageLevelState extends AbstractState {
   constructor(
@@ -62,7 +63,7 @@ export class LanguageLevelState extends AbstractState {
       });
 
       await this.ctx.reply(
-        `Your language level is set to ${this.ctx.callbackQuery.data}. You can change it later with the /level command.`,
+        `Your language level is set to ${this.ctx.callbackQuery.data}. You can change it later with the /${TelegramBotCommand.LANGUAGE_LEVEL} command.`,
       );
     } catch (error) {
       this.logger.error('Failed to handle language level selection', error);

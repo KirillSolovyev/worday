@@ -5,6 +5,7 @@ import { UserService } from '@/services/user-service';
 import { UserSettingsService } from '@/services/user-settings-service';
 
 import { AbstractState } from './abstract-state';
+import { TelegramBotCommand } from '../types';
 
 export class TopicsState extends AbstractState {
   constructor(
@@ -39,7 +40,7 @@ export class TopicsState extends AbstractState {
       });
 
       await this.ctx.reply(
-        `Great we setup your topic. You can change it later with the /topics command.`,
+        `Great we setup your topic. You can change it later with the /${TelegramBotCommand.TOPICS} command.`,
       );
     } catch (error) {
       this.logger.error('Failed to handle topics selection', error);

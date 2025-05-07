@@ -6,7 +6,9 @@ import type { UserSettings } from '@/entities/user-settings';
 import { UserService } from '@/services/user-service';
 import { UserSettingsService } from '@/services/user-settings-service';
 import { LanguageNotFoundError, LanguageService } from '@/features/language-module';
+
 import { AbstractState, NoMessageError } from './abstract-state';
+import { TelegramBotCommand } from '../types';
 
 type HandleLanguageProps = {
   nextState: UserStateEnum;
@@ -83,7 +85,7 @@ export class InitBaseLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.INIT_TARGET_LANGUAGE,
       buildMessage: language =>
-        `Great! Your language is set to ${language}. You can change it later with the /language command.`,
+        `Great! Your language is set to ${language}. You can change it later with the /${TelegramBotCommand.BASE_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         baseLanguage: language,
@@ -118,7 +120,7 @@ export class ChangeBaseLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.WORD,
       buildMessage: language =>
-        `Great! Your language is set to ${language}. You can change it later with the /language command.`,
+        `Great! Your language is set to ${language}. You can change it later with the /${TelegramBotCommand.BASE_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         baseLanguage: language,
@@ -153,7 +155,7 @@ export class InitTargetLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.INIT_LANGUAGE_LEVEL,
       buildMessage: language =>
-        `Great! Your study language is set to ${language}. You can change it later with the /studylanguage command.`,
+        `Great! Your study language is set to ${language}. You can change it later with the /${TelegramBotCommand.TARGET_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         targetLanguage: language,
@@ -188,7 +190,7 @@ export class ChangeTargetLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.WORD,
       buildMessage: language =>
-        `Great! Your study language is set to ${language}. You can change it later with the /studylanguage command.`,
+        `Great! Your study language is set to ${language}. You can change it later with the /${TelegramBotCommand.TARGET_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         targetLanguage: language,

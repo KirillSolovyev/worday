@@ -6,6 +6,7 @@ import { UserService } from '@/services/user-service';
 import { WordOfDayService } from '@/features/word-of-day-module';
 
 import { AbstractState } from './abstract-state';
+import { TelegramBotCommand } from '../types';
 
 export class WordState extends AbstractState {
   constructor(
@@ -17,7 +18,9 @@ export class WordState extends AbstractState {
   }
 
   async start() {
-    await this.ctx.reply('You are all set up! Now text /word to get the word of the day');
+    await this.ctx.reply(
+      `You are all set up! Now text /${TelegramBotCommand.WORD} to get the word of the day`,
+    );
   }
 
   async handle() {

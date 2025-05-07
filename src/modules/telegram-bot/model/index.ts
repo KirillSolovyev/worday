@@ -8,7 +8,12 @@ import { UserSettingsService } from '@/services/user-settings-service';
 import { WordOfDayService } from '@/features/word-of-day-module';
 
 import { StartState } from './start-state';
-import { InitBaseLanguageState, InitTargetLanguageState } from './language-state';
+import {
+  InitBaseLanguageState,
+  InitTargetLanguageState,
+  ChangeBaseLanguageState,
+  ChangeTargetLanguageState,
+} from './language-state';
 import { LanguageLevelState } from './language-level-state';
 import { TopicsState } from './topics-state';
 import { WordState } from './word-state';
@@ -50,7 +55,30 @@ export class TelegramBotStateService {
           this.userSettingsService,
         );
       case UserStateEnum.INIT_TOPICS:
+      case UserStateEnum.SETTINGS_TOPICS:
         return new TopicsState(ctx, this.userService, this.userSettingsService);
+      case UserStateEnum.SETTINGS_BASE_LANGUAGE:
+        return new ChangeBaseLanguageState(
+          ctx,
+          this.userService,
+          this.languageService,
+          this.userSettingsService,
+        );
+      case UserStateEnum.SETTINGS_TARGET_LANGUAGE:
+        return new ChangeTargetLanguageState(
+          ctx,
+          this.userService,
+          this.languageService,
+          this.userSettingsService,
+        );
+      case UserStateEnum.SETTINGS_LANGUAGE_LEVEL:
+        return new LanguageLevelState(
+          ctx,
+          UserStateEnum.SETTINGS_LANGUAGE_LEVEL,
+          UserStateEnum.WORD,
+          this.userService,
+          this.userSettingsService,
+        );
       case UserStateEnum.WORD:
         return new WordState(ctx, this.userService, this.wordOfDayService);
       default:
