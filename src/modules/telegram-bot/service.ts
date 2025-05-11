@@ -1,6 +1,6 @@
-import { Ctx, Start, Command, Update, On } from 'nestjs-telegraf';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import type { Context } from 'telegraf';
+import { Ctx, Start, Command, Update, On, InjectBot } from 'nestjs-telegraf';
+import { Injectable, Logger, NotFoundException, type OnModuleInit } from '@nestjs/common';
+import type { Telegraf, Context } from 'telegraf';
 
 import { UserStateEnum } from '@/entities/user-state';
 import { UserService } from '@/services/user-service';
@@ -11,13 +11,27 @@ import { TelegramBotCommand } from './types';
 
 @Injectable()
 @Update()
-export class TelegramBotUpdateService {
+export class TelegramBotUpdateService implements OnModuleInit {
   private logger = new Logger(TelegramBotUpdateService.name);
 
   constructor(
+    @InjectBot() private bot: Telegraf,
     private userService: UserService,
     private telegramBotStateService: TelegramBotStateService,
   ) {}
+
+  async onModuleInit() {
+    await this.bot.telegram.setMyCommands([
+      { command: TelegramBotCommand.START, description: 'Start the bot' },
+      { command: TelegramBotCommand.WORD, description: 'Get a word of the day' },
+      { command: TelegramBotCommand.SETTINGS, description: 'Display your settings' },
+      { command: TelegramBotCommand.BASE_LANGUAGE, description: 'Change your language' },
+      { command: TelegramBotCommand.TARGET_LANGUAGE, description: 'Change study language' },
+      { command: TelegramBotCommand.LANGUAGE_LEVEL, description: 'Change language level' },
+      { command: TelegramBotCommand.TOPICS, description: 'Change topics' },
+      { command: TelegramBotCommand.CANCEL, description: 'Cancel previous command' },
+    ]);
+  }
 
   private async getUsernameFromContext(ctx: Context) {
     const username = ctx.from?.username;
