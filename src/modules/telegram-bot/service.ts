@@ -85,7 +85,12 @@ export class TelegramBotUpdateService {
       await botState.start();
       await botState.handle();
 
-      const nextBotState = this.telegramBotStateService.getNextState(ctx, UserStateEnum.INIT);
+      const user = await this.getUserFromContext(ctx);
+      if (!user) {
+        throw new Error('User not found after starting the bot');
+      }
+
+      const nextBotState = this.telegramBotStateService.getNextState(ctx, user.state.currentState);
       await nextBotState.start();
     } catch (error) {
       this.logger.error('Error while starting bot', error);
