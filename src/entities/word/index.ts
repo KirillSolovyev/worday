@@ -1,4 +1,13 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { User } from '../user';
 import { WordExamples } from '../word-examples';
 
@@ -24,4 +33,8 @@ export class Word implements IWord {
 
   @OneToMany(() => WordExamples, example => example.word, { cascade: true })
   examples: Relation<WordExamples[]>;
+
+  @Index()
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
 }
