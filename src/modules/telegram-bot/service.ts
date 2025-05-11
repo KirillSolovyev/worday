@@ -50,18 +50,21 @@ export class TelegramBotUpdateService {
     return user;
   }
 
-  private async onSettingsChange(ctx: Context, currentState: UserStateEnum) {
-    const user = await this.getUserFromContext(ctx);
-    if (!user) return;
-
-    const isUserInitPending = [
+  private isUserInitPending(userState: UserStateEnum) {
+    return [
       UserStateEnum.INIT,
       UserStateEnum.INIT_BASE_LANGUAGE,
       UserStateEnum.INIT_TARGET_LANGUAGE,
       UserStateEnum.INIT_LANGUAGE_LEVEL,
       UserStateEnum.INIT_TOPICS,
-    ].includes(user.state.currentState);
+    ].includes(userState);
+  }
 
+  private async onSettingsChange(ctx: Context, currentState: UserStateEnum) {
+    const user = await this.getUserFromContext(ctx);
+    if (!user) return;
+
+    const isUserInitPending = this.isUserInitPending(user.state.currentState);
     const botCurrentState = isUserInitPending ? user.state.currentState : currentState;
     const botState = this.telegramBotStateService.getState(ctx, botCurrentState);
 
@@ -75,6 +78,9 @@ export class TelegramBotUpdateService {
     }
 
     await botState.start();
+    await ctx.reply(
+      `Text /${TelegramBotCommand.CANCEL} if you changed your mind or just wanted to look at the options`,
+    );
   }
 
   @Start()
@@ -191,6 +197,32 @@ export class TelegramBotUpdateService {
   @Command(TelegramBotCommand.TOPICS)
   async onTopicsChange(@Ctx() ctx: Context) {
     await this.onSettingsChange(ctx, UserStateEnum.SETTINGS_TOPICS);
+  }
+
+  @Command(TelegramBotCommand.CANCEL)
+  async onCancel(@Ctx() ctx: Context) {
+    const user = await this.getUserFromContext(ctx);
+    if (!user) return;
+
+    const isUserInitPending = this.isUserInitPending(user.state.currentState);
+    if (isUserInitPending) {
+      await ctx.reply("You can't cancel the setup process. Please finish it first");
+      return;
+    }
+
+    const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.WORD);
+
+    try {
+      await this.userService.updateState({
+        user,
+        currentState: UserStateEnum.WORD,
+      });
+
+      await botState.start();
+    } catch (error) {
+      this.logger.error('Error while canceling the process', error);
+      await ctx.reply('Oops, I could not cancel the process. Please try again');
+    }
   }
 
   @On('text')

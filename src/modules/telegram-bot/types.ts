@@ -6,4 +6,5 @@ export enum TelegramBotCommand {
   LANGUAGE_LEVEL = 'level',
   TOPICS = 'topics',
   WORD = 'word',
+  CANCEL = 'cancel',
 }
