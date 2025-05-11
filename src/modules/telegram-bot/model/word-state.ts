@@ -19,7 +19,7 @@ export class WordState extends AbstractState {
 
   async start() {
     await this.ctx.reply(
-      `You are all set up! Now text /${TelegramBotCommand.WORD} to get the word of the day`,
+      `You are ready! Now text /${TelegramBotCommand.WORD} to get the word of the day`,
     );
   }
 
