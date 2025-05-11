@@ -22,13 +22,13 @@ export class TelegramBotUpdateService implements OnModuleInit {
 
   async onModuleInit() {
     await this.bot.telegram.setMyCommands([
-      { command: TelegramBotCommand.START, description: 'Start the bot' },
       { command: TelegramBotCommand.WORD, description: 'Get a word of the day' },
-      { command: TelegramBotCommand.SETTINGS, description: 'Display your settings' },
+      { command: TelegramBotCommand.SETTINGS, description: 'Display your study settings' },
       { command: TelegramBotCommand.BASE_LANGUAGE, description: 'Change your language' },
       { command: TelegramBotCommand.TARGET_LANGUAGE, description: 'Change study language' },
       { command: TelegramBotCommand.LANGUAGE_LEVEL, description: 'Change language level' },
       { command: TelegramBotCommand.TOPICS, description: 'Change topics' },
+      { command: TelegramBotCommand.START, description: 'Start the bot' },
       { command: TelegramBotCommand.CANCEL, description: 'Cancel previous command' },
     ]);
   }
