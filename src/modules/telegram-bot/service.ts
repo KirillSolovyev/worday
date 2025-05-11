@@ -113,10 +113,19 @@ export class TelegramBotUpdateService {
     const user = await this.getUserFromContext(ctx);
     if (!user) return;
 
-    const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.WORD);
+    const isReadyToGenerateWord = user.state.currentState === UserStateEnum.WORD;
+    const botCurrentState = isReadyToGenerateWord ? UserStateEnum.WORD : user.state.currentState;
+    const botState = this.telegramBotStateService.getState(ctx, botCurrentState);
 
     try {
-      await botState.handle();
+      if (isReadyToGenerateWord) {
+        await botState.handle();
+      } else {
+        await ctx.reply(
+          'It looks like you have not finished the setup yet. Please finish it first',
+        );
+        await botState.start();
+      }
     } catch (error) {
       this.logger.error('Error while generating the word', error);
       await ctx.reply('Oops, I could not generate a word. Please try again');
