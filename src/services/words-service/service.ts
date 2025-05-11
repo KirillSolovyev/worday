@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 
 import { User } from '@/entities/user';
 import { Word } from '@/entities/word';
@@ -29,5 +29,12 @@ export class WordsService {
     });
 
     return this.wordRepository.save(wordEntity);
+  }
+
+  find(user: User, options: FindManyOptions<Word>) {
+    return this.wordRepository.find({
+      where: { user: { id: user.id } },
+      ...options,
+    });
   }
 }

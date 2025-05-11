@@ -5,6 +5,8 @@ import { User } from '@/entities/user';
 import { GeminiService } from '@/services/gemini';
 import { WordsService } from '@/services/words-service';
 
+export class WordOfDayTimeLimitError extends Error {}
+
 @Injectable()
 export class WordOfDayService {
   private readonly logger = new Logger(WordOfDayService.name);
@@ -14,18 +16,36 @@ export class WordOfDayService {
     private wordsService: WordsService,
   ) {}
 
-  async getWord(user: User) {
+  async getLastWord(user: User) {
+    const words = await this.wordsService.find(user, {
+      order: { createdAt: 'DESC' },
+      take: 1,
+      relations: { examples: true },
+    });
+
+    return words[0];
+  }
+
+  async generateWord(user: User) {
     if (!user.settings) {
       this.logger.error(`User settings not found for user: ${user.username}`);
       throw new Error('User settings not found');
     }
 
-    if (!user.words) {
-      this.logger.error('User words not provided');
-      throw new Error('User words not provided');
-    }
-
     const { targetLanguage, languageLevel, baseLanguage, topics } = user.settings;
+    const words = await this.wordsService.find(user, {
+      order: { createdAt: 'DESC' },
+      take: 15,
+    });
+
+    const [lastWord] = words;
+    if (lastWord) {
+      const diffInDays = new Date().getDate() - lastWord.createdAt.getDate();
+
+      if (diffInDays === 0) {
+        throw new WordOfDayTimeLimitError('User can generate a word only once a day');
+      }
+    }
 
     const prompt = `
       Generate a single word in ${targetLanguage} for ${languageLevel} level.
@@ -33,7 +53,7 @@ export class WordOfDayService {
       definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations in this format: <non-translated word> - <translations>; <definition>.
       Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level.
 
-      Words should be unique. Do not repeat these words: ${user.words?.map(({ word }) => word).join(', ')}
+      Words should be unique. Do not repeat these words: ${words.map(({ word }) => word).join(', ')}
     `;
 
     this.logger.log(prompt);
