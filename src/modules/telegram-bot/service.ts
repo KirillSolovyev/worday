@@ -50,6 +50,33 @@ export class TelegramBotUpdateService {
     return user;
   }
 
+  private async onSettingsChange(ctx: Context, currentState: UserStateEnum) {
+    const user = await this.getUserFromContext(ctx);
+    if (!user) return;
+
+    const isUserInitPending = [
+      UserStateEnum.INIT,
+      UserStateEnum.INIT_BASE_LANGUAGE,
+      UserStateEnum.INIT_TARGET_LANGUAGE,
+      UserStateEnum.INIT_LANGUAGE_LEVEL,
+      UserStateEnum.INIT_TOPICS,
+    ].includes(user.state.currentState);
+
+    const botCurrentState = isUserInitPending ? user.state.currentState : currentState;
+    const botState = this.telegramBotStateService.getState(ctx, botCurrentState);
+
+    if (isUserInitPending) {
+      await ctx.reply('Please finish the bot setup first');
+    } else {
+      await this.userService.updateState({
+        user,
+        currentState,
+      });
+    }
+
+    await botState.start();
+  }
+
   @Start()
   async onStart(@Ctx() ctx: Context) {
     const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.INIT);
@@ -130,6 +157,26 @@ export class TelegramBotUpdateService {
     `);
 
     await ctx.reply(message, { parse_mode: 'Markdown' });
+  }
+
+  @Command(TelegramBotCommand.BASE_LANGUAGE)
+  async onBaseLanguageChange(@Ctx() ctx: Context) {
+    await this.onSettingsChange(ctx, UserStateEnum.SETTINGS_BASE_LANGUAGE);
+  }
+
+  @Command(TelegramBotCommand.TARGET_LANGUAGE)
+  async onTargetLanguageChange(@Ctx() ctx: Context) {
+    await this.onSettingsChange(ctx, UserStateEnum.SETTINGS_TARGET_LANGUAGE);
+  }
+
+  @Command(TelegramBotCommand.LANGUAGE_LEVEL)
+  async onLanguageLevelChange(@Ctx() ctx: Context) {
+    await this.onSettingsChange(ctx, UserStateEnum.SETTINGS_LANGUAGE_LEVEL);
+  }
+
+  @Command(TelegramBotCommand.TOPICS)
+  async onTopicsChange(@Ctx() ctx: Context) {
+    await this.onSettingsChange(ctx, UserStateEnum.SETTINGS_TOPICS);
   }
 
   @On('text')
