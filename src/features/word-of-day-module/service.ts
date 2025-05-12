@@ -52,7 +52,7 @@ export class WordOfDayService {
 
     const prompt = `
       Generate a single word in ${targetLanguage} for ${languageLevel} level.
-      Word: should be related but not limited to ${withUserPromptDisclaimer(topics)}).
+      Word: should be related but not limited to ${withUserPromptDisclaimer(topics)}.
       definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations in this format: <non-translated word> - <translations>; <definition>.
       Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level.
 
