@@ -37,7 +37,7 @@ export class StartState extends AbstractState {
         'To generate the word of the day I need to know your preferences. Please set them up',
       );
     } else {
-      await this.ctx.reply(`Welcome back, ${user.username}!`);
+      await this.ctx.reply(`Welcome back!`);
     }
   }
 }

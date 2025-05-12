@@ -28,11 +28,11 @@ export abstract class AbstractState {
   }
 
   getUserName() {
-    if (!this.ctx.from?.username) {
-      throw new NoUserError('No username found in context');
+    if (!this.ctx.from?.id) {
+      throw new NoUserError('No user id found in context');
     }
 
-    return this.ctx.from.username;
+    return String(this.ctx.from.id); // Use user id since telegram username can be changed
   }
 
   // TODO: Get user as a prop instead of fetching it twice, since we must fetch it before initializing the state

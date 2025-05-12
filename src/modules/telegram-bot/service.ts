@@ -34,7 +34,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
   }
 
   private async getUsernameFromContext(ctx: Context) {
-    const username = ctx.from?.username;
+    const username = ctx.from?.id;
 
     if (!username) {
       this.logger.error('No username found in context');
@@ -44,7 +44,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
       return;
     }
 
-    return username;
+    return String(username);
   }
 
   private async getUserFromContext(ctx: Context) {
