@@ -3,6 +3,7 @@ import { Context } from 'telegraf';
 import { UserService } from '@/services/user-service';
 import { UserStateEnum } from '@/entities/user-state';
 import { AbstractState } from './abstract-state';
+import { TelegramBotCommand } from '../types';
 
 export class StartState extends AbstractState {
   constructor(ctx: Context, userService: UserService) {
@@ -21,7 +22,6 @@ export class StartState extends AbstractState {
 
     const user = await this.userService.findOne({
       where: { username },
-      relations: { state: true },
     });
 
     if (!user) {
@@ -37,7 +37,9 @@ export class StartState extends AbstractState {
         'To generate the word of the day I need to know your preferences. Please set them up',
       );
     } else {
-      await this.ctx.reply(`Welcome back!`);
+      await this.ctx.reply(
+        `You have already started the bot. To generate a word type /${TelegramBotCommand.WORD}`,
+      );
     }
   }
 }

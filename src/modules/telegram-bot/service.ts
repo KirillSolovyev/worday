@@ -99,19 +99,26 @@ export class TelegramBotUpdateService implements OnModuleInit {
 
   @Start()
   async onStart(@Ctx() ctx: Context) {
-    const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.INIT);
-
     try {
+      const username = ctx.from?.id;
+
+      if (!username) {
+        throw new Error('User does not have a username/id');
+      }
+
+      const existingUser = await this.userService.findOne({
+        where: { username: String(username) },
+      });
+
+      const botState = this.telegramBotStateService.getState(ctx, UserStateEnum.INIT);
+
       await botState.start();
       await botState.handle();
 
-      const user = await this.getUserFromContext(ctx);
-      if (!user) {
-        throw new Error('User not found after starting the bot');
+      if (!existingUser) {
+        const nextBotState = this.telegramBotStateService.getNextState(ctx, UserStateEnum.INIT);
+        await nextBotState.start();
       }
-
-      const nextBotState = this.telegramBotStateService.getNextState(ctx, user.state.currentState);
-      await nextBotState.start();
     } catch (error) {
       this.logger.error('Error while starting bot', error);
 
