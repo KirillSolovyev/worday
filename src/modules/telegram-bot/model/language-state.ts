@@ -77,7 +77,7 @@ export class InitBaseLanguageState extends BaseLanguageState {
 
   async start() {
     await super.start(
-      'Please text the language you speak. I will use it to explain meanings of the words. For example: "Russian"',
+      'Please text the language you speak. I will use it to explain meanings of the words. For example: "English"',
     );
   }
 
@@ -112,7 +112,7 @@ export class ChangeBaseLanguageState extends BaseLanguageState {
 
   async start() {
     await super.start(
-      'Please text the language you speak. I will use it to explain meanings of the words. For example: "Russian"',
+      'Please text the language you speak. I will use it to explain meanings of the words. For example: "English"',
     );
   }
 
