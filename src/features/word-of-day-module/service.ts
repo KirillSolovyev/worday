@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Type } from '@google/genai';
 
 import { User } from '@/entities/user';
@@ -15,8 +16,9 @@ export class WordOfDayService {
   private readonly logger = new Logger(WordOfDayService.name);
 
   constructor(
-    private geminiService: GeminiService,
     private wordsService: WordsService,
+    private geminiService: GeminiService,
+    private configService: ConfigService,
   ) {}
 
   async getLastWord(user: User) {
@@ -41,8 +43,11 @@ export class WordOfDayService {
       take: 20,
     });
 
+    const testUsers = this.configService.get<string[]>('TEST_USER_IDS', []);
+    const isTestingUser = testUsers.includes(user.id);
+
     const [lastWord] = words;
-    if (lastWord) {
+    if (!isTestingUser && lastWord) {
       const diffInDays = new Date().getDate() - lastWord.createdAt.getDate();
 
       if (diffInDays === 0) {
