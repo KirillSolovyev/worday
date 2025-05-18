@@ -58,7 +58,7 @@ export class WordOfDayService {
     const prompt = `
       Generate a single word in ${targetLanguage} for ${languageLevel} level.
       Word: should be related but not limited to ${withUserPromptDisclaimer(topics)}.
-      definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations
+      definition: It must have 3 most common translations in ${baseLanguage}. If the word is not simple explain the meaning of the word in ${baseLanguage}
       Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level. Translation to ${baseLanguage} should follow every example
 
       Example:
@@ -66,7 +66,7 @@ export class WordOfDayService {
       baseLanguage: "Russian" (language the user speaks)
 
       word: "House"
-      definition: "House - Дом, жилище, здание (3 translations. Do not include this in the output); Здание, предназначенное для проживания людей"
+      definition: "House - Дом, жилище, здание (Only 3 words without explanation since the word is simple)"
       examples: [
         "I have a small house - У меня есть маленький дом",
         "My house is near the park. - Мой дом рядом с парком",
