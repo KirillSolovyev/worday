@@ -39,7 +39,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
     if (!username) {
       this.logger.error('No username found in context');
       await ctx.reply(
-        `It looks like you have not started the bot yet. Try to type /${TelegramBotCommand.START}`,
+        `It looks like you have not started the bot yet. To start text /${TelegramBotCommand.START}`,
       );
       return;
     }
@@ -57,7 +57,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
     });
 
     if (!user) {
-      await ctx.reply(`User not found. Please start the bot first: /${TelegramBotCommand.START}`);
+      await ctx.reply(`User not found. Please text /${TelegramBotCommand.START} to start the bot`);
       return;
     }
 
@@ -83,7 +83,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
     const botState = this.telegramBotStateService.getState(ctx, botCurrentState);
 
     if (isUserInitPending) {
-      await ctx.reply('Please finish the bot setup first');
+      await ctx.reply('You have a pending setup process. Please finish it first');
     } else {
       await this.userService.updateState({
         user,
@@ -124,7 +124,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
 
       if (error instanceof NotFoundException) {
         await ctx.reply(
-          `It looks like you have not started the bot yet. Try to type /${TelegramBotCommand.START}`,
+          `It looks like you have not started the bot yet. To start text /${TelegramBotCommand.START}`,
           {
             parse_mode: 'Markdown',
           },
@@ -148,9 +148,7 @@ export class TelegramBotUpdateService implements OnModuleInit {
       if (isReadyToGenerateWord) {
         await botState.handle();
       } else {
-        await ctx.reply(
-          'It looks like you have not finished the setup yet. Please finish it first',
-        );
+        await ctx.reply('To get the word of the day you need to finish the setup process first');
         await botState.start();
       }
     } catch (error) {
@@ -182,9 +180,9 @@ export class TelegramBotUpdateService implements OnModuleInit {
       \`${targetLanguage}\`
       Text /${TelegramBotCommand.TARGET_LANGUAGE} to change it
 
-      *Base language:*
+      *Language:*
       \`${baseLanguage}\`
-      Text /${TelegramBotCommand.BASE_LANGUAGE} to change it 
+      Text /${TelegramBotCommand.BASE_LANGUAGE} to change it
 
       *Language level:*
       \`${languageLevel}\`
@@ -192,12 +190,12 @@ export class TelegramBotUpdateService implements OnModuleInit {
 
       *Topics:*
       \`${topics}\`
-      Text to change it /${TelegramBotCommand.TOPICS}
+      Text /${TelegramBotCommand.TOPICS} to change it
 
-      You can change your settings at any time. Just text me the command
+      You can change your settings at any time\\. Just text me the command
     `);
 
-    await ctx.reply(message, { parse_mode: 'Markdown' });
+    await ctx.reply(message, { parse_mode: 'MarkdownV2' });
   }
 
   @Command(TelegramBotCommand.BASE_LANGUAGE)
