@@ -5,6 +5,7 @@ import type { Telegraf, Context } from 'telegraf';
 import { UserStateEnum } from '@/entities/user-state';
 import { UserService } from '@/services/user-service';
 
+import { getVerbalLanguage } from '@/shared/config/languages';
 import { prettyTL } from '@/shared/lib/pretty-tl';
 import { TelegramBotStateService } from './model';
 import { TelegramBotCommand } from './types';
@@ -57,7 +58,9 @@ export class TelegramBotUpdateService implements OnModuleInit {
     });
 
     if (!user) {
-      await ctx.reply(`User not found. Please text /${TelegramBotCommand.START} to start the bot`);
+      await ctx.reply(
+        `It looks like you have not started the bot yet. Please text /${TelegramBotCommand.START} to start the bot`,
+      );
       return;
     }
 
@@ -177,11 +180,11 @@ export class TelegramBotUpdateService implements OnModuleInit {
     const { targetLanguage, languageLevel, baseLanguage, topics } = settings.settings;
     const message = prettyTL(`
       *Study language:*
-      \`${targetLanguage}\`
+      \`${getVerbalLanguage(targetLanguage)}\`
       Text /${TelegramBotCommand.TARGET_LANGUAGE} to change it
 
       *Language:*
-      \`${baseLanguage}\`
+      \`${getVerbalLanguage(baseLanguage)}\`
       Text /${TelegramBotCommand.BASE_LANGUAGE} to change it
 
       *Language level:*

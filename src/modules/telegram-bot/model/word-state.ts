@@ -38,7 +38,7 @@ export class WordState extends AbstractState {
   }
 
   private buildMessage(word: Word) {
-    const formattedExamples = word.examples.map(({ value }) => `- ${value}`).join('\n');
+    const formattedExamples = word.examples.map(({ value }) => `- ${value}`).join('\n\n');
     const formattedMessage = prettyTL(`
         *${word.word}*
 

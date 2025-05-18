@@ -1,6 +1,6 @@
 import { Context } from 'telegraf';
 
-import { Language } from '@/shared/config/languages';
+import { getVerbalLanguage, Language } from '@/shared/config/languages';
 import { UserStateEnum } from '@/entities/user-state';
 import type { UserSettings } from '@/entities/user-settings';
 import { UserService } from '@/services/user-service';
@@ -12,7 +12,7 @@ import { TelegramBotCommand } from '../types';
 
 type HandleLanguageProps = {
   nextState: UserStateEnum;
-  buildMessage: (language: string) => string;
+  buildMessage: (language: Language) => string;
   deriveUserSettings: (userSettings: UserSettings, language: Language) => UserSettings;
 };
 
@@ -50,7 +50,7 @@ abstract class BaseLanguageState extends AbstractState {
         currentState: nextState,
       });
 
-      await this.ctx.reply(buildMessage(language));
+      await this.ctx.reply(buildMessage(language), { parse_mode: 'Markdown' });
     } catch (error) {
       this.logger.error('Failed to handle a language');
 
@@ -85,7 +85,7 @@ export class InitBaseLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.INIT_TARGET_LANGUAGE,
       buildMessage: language =>
-        `Great! Your language is set to ${language}. You can change it later with the /${TelegramBotCommand.BASE_LANGUAGE} command.`,
+        `Great! Your language is set to \`${getVerbalLanguage(language)}\`. You can change it later with the /${TelegramBotCommand.BASE_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         baseLanguage: language,
@@ -120,7 +120,7 @@ export class ChangeBaseLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.WORD,
       buildMessage: language =>
-        `Great! Your language is set to ${language}. You can change it later with the /${TelegramBotCommand.BASE_LANGUAGE} command.`,
+        `Great! Your language is set to \`${getVerbalLanguage(language)}\`. You can change it later with the /${TelegramBotCommand.BASE_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         baseLanguage: language,
@@ -155,7 +155,7 @@ export class InitTargetLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.INIT_LANGUAGE_LEVEL,
       buildMessage: language =>
-        `Great! Your study language is set to ${language}. You can change it later with the /${TelegramBotCommand.TARGET_LANGUAGE} command.`,
+        `Great! Your study language is set to \`${getVerbalLanguage(language)}\`. You can change it later with the /${TelegramBotCommand.TARGET_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         targetLanguage: language,
@@ -190,7 +190,7 @@ export class ChangeTargetLanguageState extends BaseLanguageState {
     await super.handle({
       nextState: UserStateEnum.WORD,
       buildMessage: language =>
-        `Great! Your study language is set to ${language}. You can change it later with the /${TelegramBotCommand.TARGET_LANGUAGE} command.`,
+        `Great! Your study language is set to \`${getVerbalLanguage(language)}\`. You can change it later with the /${TelegramBotCommand.TARGET_LANGUAGE} command.`,
       deriveUserSettings: (userSettings, language) => ({
         ...userSettings,
         targetLanguage: language,
