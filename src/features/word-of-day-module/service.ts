@@ -38,7 +38,7 @@ export class WordOfDayService {
     const { targetLanguage, languageLevel, baseLanguage, topics } = user.settings;
     const words = await this.wordsService.find(user, {
       order: { createdAt: 'DESC' },
-      take: 15,
+      take: 20,
     });
 
     const [lastWord] = words;
@@ -53,10 +53,22 @@ export class WordOfDayService {
     const prompt = `
       Generate a single word in ${targetLanguage} for ${languageLevel} level.
       Word: should be related but not limited to ${withUserPromptDisclaimer(topics)}.
-      definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations in this format: <non-translated word> - <translations>; <definition>.
-      Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level.
+      definition: should be in ${baseLanguage} and should explain the meaning of the word. It must have 3 most common translations
+      Examples: should be easy and in ${targetLanguage} and for ${languageLevel} level. Translation to ${baseLanguage} should follow every example
 
-      Words should be unique. Do not repeat these words: ${words.map(({ word }) => word).join(', ')}
+      Example:
+      targetLanguage: "English" (language the user studies)
+      baseLanguage: "Russian" (language the user speaks)
+
+      word: "House"
+      definition: "House - Дом, жилище, здание (3 translations. Do not include this in the output); Здание, предназначенное для проживания людей"
+      examples: [
+        "I have a small house - У меня есть маленький дом",
+        "My house is near the park. - Мой дом рядом с парком",
+        (sarcastic and funny) "I thought I’d fix the leak in the roof myself. Now I’m considering buying a new house. - Я решил сам починить крышу. Теперь думаю, может, лучше купить новый дом.",
+      ]
+
+      Words must be unique. DO NOT REPEAT a single word from the list: "${words.map(({ word }) => word).join(', ')}"
     `;
 
     this.logger.log(prompt);
@@ -71,7 +83,7 @@ export class WordOfDayService {
       ],
       config: {
         systemInstruction:
-          "You are a language teacher. Generate a word (noun, verb or adjective) with 3 example sentences. You should be serious and friendly, but one example might be funny and sarcastic. Don't use markdown, quotes or any other formatting.",
+          "You are a language teacher. Generate a word (noun, verb or adjective) with 3 example sentences. You should be serious and friendly, but one example should be funny and sarcastic. Don't use markdown, quotes or any other formatting.",
         temperature: 1.25,
         topP: 0.8,
         responseMimeType: 'application/json',
