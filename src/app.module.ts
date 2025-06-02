@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SentryModule, SentryGlobalFilter } from '@sentry/nestjs/setup';
 import { TelegrafModule } from 'nestjs-telegraf';
 
 import { DBProvider } from '@/providers/db-provider';
-import { AppController } from '@/app.controller';
-import { AppService } from '@/app.service';
 
 import { TelegramBotModule } from '@/modules/telegram-bot';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    SentryModule.forRoot(),
     DBProvider,
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
@@ -29,7 +30,11 @@ import { TelegramBotModule } from '@/modules/telegram-bot';
     }),
     TelegramBotModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
+    },
+  ],
 })
 export class AppModule {}
