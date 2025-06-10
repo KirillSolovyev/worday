@@ -10,8 +10,20 @@ services:
     volumes:
       - worday_db_data:/var/lib/postgresql/data
 
-  app:
-    build: .
+  worday_app:
+    image: worday_app:latest
+    build:
+      context: .
+      target: ${DOCKER_BUILD_TARGET}
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules
+        - action: rebuild
+          path: ./package.json
     environment:
       ENV: ${ENV}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
