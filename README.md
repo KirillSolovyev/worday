@@ -2,6 +2,29 @@
 
 The app to learn a new word everyday
 
+## How to run
+
+### Locally
+
+We use Docker compose with develop mode to enable hot reload and automatic container sync/rebuild
+
+You need to set the env var `DOCKER_BUILD_TARGET="dev"`
+
+```
+docker-compose up --build --watch
+```
+
+`--build` - makes sure that the latest built image was build for dev mode (docker-compose reuse existing images)
+'--watch' - runs docker in the watch mode
+
+### Staging/Production
+
+To make a staging/production build run you need to set the env var `DOCKER_BUILD_TARGET="prod"` and run
+
+```
+docker-compose up --build
+```
+
 ## Features list
 
 ### Basic
