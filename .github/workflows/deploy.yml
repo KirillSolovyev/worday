@@ -53,9 +53,9 @@ jobs:
       - name: Connect to AWS EC2 instance
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.AWS_HOST }}
+          host: ${{ secrets.AWS_HOSTNAME }}
           username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_SSH_KEY }}
+          key: ${{ secrets.AWS_CERTIFICATE }}
           port: ${{ secrets.AWS_PORT }}
           script: |
             docker pull $WORDAY_APP_IMAGE
