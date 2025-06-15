@@ -11,7 +11,7 @@ services:
       - worday_db_data:/var/lib/postgresql/data
 
   worday_app:
-    image: worday_app:latest
+    image: ${WORDAY_APP_IMAGE:-worday_app:latest} # Use default name if variable is not set or empty
     build:
       context: .
       target: ${DOCKER_BUILD_TARGET}
