@@ -13,7 +13,7 @@ jobs:
     env:
       ENV: ${{ vars.ENV }}
       DOCKER_BUILD_TARGET: ${{ vars.DOCKER_BUILD_TARGET }}
-      WORDAY_APP_IMAGE: ${{ secrets.DOCKER_USERNAME }}/worday_app:latest
+      WORDAY_APP_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/worday_app:latest
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       DB_HOST: ${{ vars.DB_HOST }}
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      WORDAY_APP_IMAGE: ${{ secrets.DOCKER_USERNAME }}/worday_app:latest
+      WORDAY_APP_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/worday_app:latest
 
     steps:
       - name: Checkout code
