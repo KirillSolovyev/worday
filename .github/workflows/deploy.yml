@@ -37,7 +37,6 @@ jobs:
       - name: Build and push Docker image with docker compose
         run: |
           docker compose build worday_app
-          docker tag worday_app:latest $WORDAY_APP_IMAGE
           docker push $WORDAY_APP_IMAGE
 
   deploy:
