@@ -60,4 +60,4 @@ jobs:
           envs: WORDAY_APP_IMAGE
           script: |
             docker pull $WORDAY_APP_IMAGE
-            docker compose up -d
+            docker-compose up -d
