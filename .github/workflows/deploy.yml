@@ -44,6 +44,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
+      ENV: ${{ vars.ENV }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      TEST_USER_IDS: ${{ secrets.TEST_USER_IDS }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       WORDAY_APP_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/worday_app:latest
 
     steps:
@@ -67,7 +77,7 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_CERTIFICATE }}
           port: ${{ secrets.AWS_PORT }}
-          envs: WORDAY_APP_IMAGE
+          envs: ENV,GEMINI_API_KEY,TELEGRAM_BOT_TOKEN,DB_HOST,DB_PORT,DB_USERNAME,DB_PASSWORD,DB_DATABASE,TEST_USER_IDS,WORDAY_APP_IMAGE
           script: |
             docker pull $WORDAY_APP_IMAGE
             docker-compose up -d
