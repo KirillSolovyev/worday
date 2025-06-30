@@ -60,6 +60,7 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: 'da3e7d3e8e8986614d67ac6428a9ad5a146084bc'
           filters: |
             migrations:
               - 'db/migrations/**'
