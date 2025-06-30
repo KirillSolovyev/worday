@@ -25,4 +25,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/providers/db-provider/data-source.ts ./src/providers/db-provider/data-source.ts
 EXPOSE 3210
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
