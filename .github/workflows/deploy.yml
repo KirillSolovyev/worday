@@ -39,8 +39,42 @@ jobs:
           docker compose build worday_app
           docker push $WORDAY_APP_IMAGE
 
-  deploy:
+  migrations:
     needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ENV: ${{ vars.ENV }}
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      WORDAY_APP_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/worday_app:latest
+
+    steps:
+      - name: Run migrations
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AWS_HOSTNAME }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_CERTIFICATE }}
+          port: ${{ secrets.AWS_PORT }}
+          envs: ENV,DB_HOST,DB_PORT,DB_USERNAME,DB_PASSWORD,DB_DATABASE,WORDAY_APP_IMAGE
+          script: |
+            docker pull $WORDAY_APP_IMAGE
+            docker run --rm \
+              -e ENV=$ENV \
+              -e DB_HOST=$DB_HOST \
+              -e DB_PORT=$DB_PORT \
+              -e DB_USERNAME=$DB_USERNAME \
+              -e DB_PASSWORD=$DB_PASSWORD \
+              -e DB_DATABASE=$DB_DATABASE \
+              $WORDAY_APP_IMAGE \
+              npm run migration:run
+
+  deploy:
+    needs: [build, migrations]
     runs-on: ubuntu-latest
     environment: production
     env:
