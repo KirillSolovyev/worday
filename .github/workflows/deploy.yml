@@ -53,7 +53,19 @@ jobs:
       WORDAY_APP_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/worday_app:latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for new migrations
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            migrations:
+              - 'db/migrations/**'
+
       - name: Run migrations
+        if: steps.filter.outputs.migrations == 'true'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.AWS_HOSTNAME }}
