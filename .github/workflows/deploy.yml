@@ -119,4 +119,4 @@ jobs:
           envs: ENV,GEMINI_API_KEY,TELEGRAM_BOT_TOKEN,DB_HOST,DB_PORT,DB_USERNAME,DB_PASSWORD,DB_DATABASE,TEST_USER_IDS,SENTRY_DSN,WORDAY_APP_IMAGE
           script: |
             docker pull $WORDAY_APP_IMAGE
-            docker-compose up --force-recreate
+            docker-compose up -d --force-recreate --no-build
