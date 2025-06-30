@@ -76,15 +76,7 @@ jobs:
           envs: ENV,DB_HOST,DB_PORT,DB_USERNAME,DB_PASSWORD,DB_DATABASE,WORDAY_APP_IMAGE
           script: |
             docker pull $WORDAY_APP_IMAGE
-            docker run --rm \
-              -e ENV=$ENV \
-              -e DB_HOST=$DB_HOST \
-              -e DB_PORT=$DB_PORT \
-              -e DB_USERNAME=$DB_USERNAME \
-              -e DB_PASSWORD=$DB_PASSWORD \
-              -e DB_DATABASE=$DB_DATABASE \
-              $WORDAY_APP_IMAGE \
-              npm run migration:run
+            docker-compose run --rm worday_app npm run migration:run
 
   deploy:
     needs: [build, migrations]
