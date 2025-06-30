@@ -12,7 +12,7 @@ export const dataSourceConfig: DataSourceOptions = {
   username: configService.getOrThrow<string>('DB_USERNAME'),
   password: configService.getOrThrow<string>('DB_PASSWORD'),
   database: configService.getOrThrow<string>('DB_DATABASE'),
-  entities: ['dist/entities/**/*.js'],
+  entities: ['dist/src/entities/**/*.{ts,js}'],
   migrations: ['dist/db/migrations/*.{ts,js}'],
   migrationsRun: false,
   synchronize: false,
