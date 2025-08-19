@@ -1,29 +1,77 @@
 # Worday
 
-The app to learn a new word everyday
+An educational project designed to enhance language learning through daily AI-powered word discovery. Every day, users receive a new word along with AI-generated examples and interactive learning assistance, making the language learning process engaging
+
+## Tech Stack
+
+- **Backend**: NestJS (TypeScript-based Node.js framework)
+- **Database**: PostgreSQL with TypeORM for data management
+- **AI Integration**: Google Gemini AI for word generation and examples
+- **User Interface**: Telegram Bot API for user interactions
+- **Infrastructure**: Docker & Docker Compose
+- **Deployment**: AWS EC2
+- **CI/CD**: GitHub Actions
+- **Testing**: Jest for e2e testing
 
 ## How to run
 
-### Locally
+### Local Development with Docker Compose
 
-We use Docker compose with develop mode to enable hot reload and automatic container sync/rebuild
+The project uses Docker Compose for easy local development with hot reload capabilities and automatic container synchronization.
 
-You need to set the env var `DOCKER_BUILD_TARGET="dev"`
+1. Set up environment variables in .env file:
 
-```
-docker-compose up --build --watch
-```
+   ```bash
+   DOCKER_BUILD_TARGET="dev"
+   ```
 
-`--build` - makes sure that the latest built image was build for dev mode (docker-compose reuse existing images)
-'--watch' - runs docker in the watch mode
+2. Start the development environment:
 
-### Staging/Production
+   ```bash
+   docker-compose up --build --watch
+   ```
 
-To make a staging/production build run you need to set the env var `DOCKER_BUILD_TARGET="prod"` and run
+   - `--build`: Ensures the latest development image is built
+   - `--watch`: Enables hot reload and automatic rebuilds on code changes
 
-```
-docker-compose up --build
-```
+### Production Deployment
+
+#### Docker Compose Production Build
+
+1. Set the production environment:
+
+   ```bash
+   export DOCKER_BUILD_TARGET="prod"
+   ```
+
+2. Build and run production containers:
+   ```bash
+   docker-compose up --build
+   ```
+
+#### AWS EC2 Deployment
+
+1. Provision an EC2 instance with Docker and Docker Compose installed
+2. Configure security groups to allow:
+
+   - Inbound traffic on port 80 (HTTP)
+   - Inbound traffic on port 443 (HTTPS)
+   - Custom port for Telegram Bot webhook (if applicable)
+
+3. Clone the repository and set up environment variables
+4. Run the production Docker Compose setup
+
+## CI/CD with GitHub Actions
+
+The project uses GitHub Actions for automated workflows:
+
+**Deployment Pipeline**
+
+- Triggers on merge to main branch
+- Builds Docker images
+- Runs security scans
+- Deploys to AWS EC2 using Docker Compose
+- Performs health checks post-deployment
 
 ## Features list
 
